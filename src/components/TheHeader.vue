@@ -1,9 +1,11 @@
 <template>
-  <header class="flex p-3 justify-between bg-gradient-to-r from-slate-800 to-gray-600 items-center">
-    <div class="flex space-x-1 text-slate-100 text-2xl">
+  <header
+    class="flex p-3 justify-between bg-gradient-to-r from-slate-800 to-gray-600 items-center fixed w-full"
+  >
+    <div @click="mobileNavOpen = false" class="flex space-x-1 text-slate-100 text-xl items-center">
       <svg
         xmlns="http://www.w3.org/2000/svg"
-        class="h-8 w-8 text-amber-300"
+        class="h-6 w-6 text-amber-300"
         fill="none"
         viewBox="0 0 24 24"
         stroke="currentColor"
@@ -17,10 +19,66 @@
       </svg>
       <router-link to="/">가상코인거래소</router-link>
     </div>
-    <div class="space-x-4 mr-3 font-bold text-slate-100">
-      <router-link to="/about">내 정보</router-link>
+    <div v-show="!mobileNavOpen" class="sm:hidden" @click="mobileNavOpen = true">
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        class="h-6 w-6 text-slate-100 hover:rotate-180 transition"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke="currentColor"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M4 6h16M4 12h16M4 18h16"
+        />
+      </svg>
+    </div>
+    <nav class="hidden sm:block space-x-4 mr-3 font-bold text-slate-100">
       <span>로그인</span>
       <span>회원가입</span>
-    </div>
+    </nav>
   </header>
+  <transition enter-active-class="animate__animated animate__slideInRight animate__faster">
+    <nav
+      v-show="mobileNavOpen"
+      class="flex flex-col space-y-3 items-end bg-gray-200 p-4 sm:hidden top-1 right-1 rounded-lg fixed shadow-lg"
+    >
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        class="h-6 w-6 hover:rotate-180 transition"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke="currentColor"
+        @click="mobileNavOpen = false"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M6 18L18 6M6 6l12 12"
+        />
+      </svg>
+      <ul @click="mobileNavOpen = false" class="flex flex-col items-end space-y-2">
+        <li>로그인</li>
+        <li>
+          <router-link to="/signup">회원가입</router-link>
+        </li>
+      </ul>
+    </nav>
+  </transition>
 </template>
+
+<script>
+export default {
+  name: "TheHeader",
+  components: {},
+  data() {
+    return {
+      mobileNavOpen: false,
+    }
+  },
+  methods: {},
+}
+</script>
