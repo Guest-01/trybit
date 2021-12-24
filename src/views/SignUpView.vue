@@ -1,4 +1,5 @@
 <template>
+  <ErrorModal @closeModal="modalActive = false" :modalActive="modalActive" :msg="error" />
   <div
     class="bg-gradient-to-tl from-slate-300 to-slate-200 rounded-lg p-2 flex flex-col items-center"
   >
@@ -67,12 +68,19 @@
 
 <script>
 import useVuelidate from '@vuelidate/core'
-import { kRequired, kEmail, kMinLength, kSameAs, kAgree } from '../koreanValidator';
+import { kRequired, kEmail, kMinLength, kMaxLength, kSameAs, kAgree } from '../koreanValidator';
+import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth"
+import { auth } from '../my.firebase';
+import ErrorModal from '../components/ErrorModal.vue';
 
 export default {
+  inheritAttrs: false,
   name: "SignUpView",
+  components: { ErrorModal },
   data() {
     return {
+      error: null,
+      modalActive: false,
       v$: useVuelidate(),
       username: '',
       email: '',
@@ -85,7 +93,7 @@ export default {
   },
   validations() {
     return {
-      username: { required: kRequired },
+      username: { required: kRequired, maxLength: kMaxLength },
       email: { required: kRequired, email: kEmail },
       password: {
         password: { required: kRequired, minLength: kMinLength },
@@ -95,13 +103,34 @@ export default {
     }
   },
   methods: {
-    signup() {
-      console.log('submit!')
+    async signup() {
       this.v$.$validate()
       if (!this.v$.$error) {
-        console.log("submit sucesss, proceed")
+        try {
+          await createUserWithEmailAndPassword(auth, this.email, this.password.password)
+          await updateProfile(auth.currentUser, { displayName: this.username })
+          this.$router.push('/')
+        } catch (error) {
+          this.modalActive = true;
+          switch (error.code) {
+            case "auth/email-already-in-use":
+              this.error = "이미 가입된 회원입니다"
+              break;
+            case "auth/invalid-email":
+              this.error = "유효하지 않은 이메일입니다"
+              break;
+            case "auth/weak-password":
+              this.error = "너무 쉬운 비밀번호입니다"
+              break;
+            default:
+              console.log(JSON.stringify(error));
+              this.modalActive = true;
+              this.error = error.code;
+              break;
+          }
+        }
       } else {
-        console.error("validation error")
+        console.error("form validation error")
       }
     }
   }

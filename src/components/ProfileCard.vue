@@ -2,9 +2,10 @@
   <article class="bg-gradient-to-tl from-blue-200 to-blue-100 rounded-lg p-2">
     <!-- 로그인 했을 때 -->
     <div v-if="user" class="flex flex-col space-y-1">
+      <div class="text-sm text-indigo-600">{{ user?.displayName }} 님</div>
       <div class="flex justify-between text-xl">
         <h2>총 자산</h2>
-        <h2>123,123원</h2>
+        <h2>123,123,123원</h2>
       </div>
       <div class="flex justify-between">
         <span>현금</span>
@@ -35,7 +36,10 @@
     </div>
     <!-- 로그인 안했을 때 -->
     <div v-else class="flex justify-center items-center">
-      <button class="cursor-pointer underline underline-offset-2">내 자산을 보시려면 로그인해주세요</button>
+      <router-link
+        to="/login"
+        class="cursor-pointer underline underline-offset-2"
+      >내 자산을 보시려면 로그인해주세요</router-link>
     </div>
   </article>
 </template>
@@ -43,10 +47,11 @@
 <script>
 export default {
   name: "ProfileCard",
-  data() {
-    return {
-      user: true,
+  computed: {
+    user() {
+      return this.currentUser;
     }
   },
+  props: ['currentUser']
 }
 </script>

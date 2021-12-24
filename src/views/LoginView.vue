@@ -1,4 +1,5 @@
 <template>
+  <ErrorModal @closeModal="modalActive = false" :modalActive="modalActive" :msg="error" />
   <div
     class="bg-gradient-to-tl from-slate-300 to-slate-200 rounded-lg p-2 flex flex-col items-center"
   >
@@ -30,35 +31,66 @@
 </template>
 
 <script>
+import { signInWithEmailAndPassword } from '@firebase/auth';
 import useVuelidate from '@vuelidate/core'
 import { kRequired, kEmail, kMinLength, kSameAs, kAgree } from '../koreanValidator';
+import { auth } from '../my.firebase';
+import ErrorModal from '../components/ErrorModal.vue';
 
 export default {
+  inheritAttrs: false,
   name: "LoginView",
+  components: { ErrorModal },
   data() {
     return {
       v$: useVuelidate(),
-      email: '',
-      password: '',
-    }
+      email: "",
+      password: "",
+      modalActive: false,
+      error: null,
+    };
   },
   validations() {
     return {
       email: { required: kRequired, email: kEmail },
       password: { required: kRequired, minLength: kMinLength },
-    }
+    };
   },
   methods: {
-    login() {
-      console.log('submit!')
-      this.v$.$validate()
+    async login() {
+      this.v$.$validate();
       if (!this.v$.$error) {
-        console.log("submit sucesss, proceed")
-      } else {
-        console.error("validation error")
+        try {
+          await signInWithEmailAndPassword(auth, this.email, this.password);
+          this.$router.push("/");
+        }
+        catch (error) {
+          switch (error.code) {
+            case "auth/wrong-password":
+              this.modalActive = true;
+              this.error = "비밀번호가 맞지 않습니다"
+              break;
+            case "auth/user-not-found":
+              this.modalActive = true;
+              this.error = "존재하지 않는 회원입니다"
+              break;
+            case "auth/too-many-requests":
+              this.modalActive = true;
+              this.error = "잠시 후에 다시 시도하세요"
+              break;
+            default:
+              console.log(JSON.stringify(error));
+              this.modalActive = true;
+              this.error = error.code;
+              break;
+          }
+        }
+      }
+      else {
+        console.error("form validation error");
       }
     }
-  }
+  },
 }
 </script>
 

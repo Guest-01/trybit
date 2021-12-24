@@ -1,5 +1,5 @@
 <template>
-  <ProfileCard />
+  <ProfileCard :currentUser="currentUser" />
   <section class="space-y-1 my-2">
     <CoinCard
       @buy="$emit('buy', coin, 'buy')"
@@ -16,12 +16,13 @@ import CoinCard from '../components/CoinCard.vue';
 import ProfileCard from '../components/ProfileCard.vue';
 
 export default {
+  inheritAttrs: false,
   name: "HomeView",
   components: {
     CoinCard,
     ProfileCard,
   },
-  props: ['coins'],
+  props: ['coins', 'currentUser'],
   emits: ["buy", "sell"]
 }
 </script>

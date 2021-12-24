@@ -1,4 +1,4 @@
-import { required, email, minLength, sameAs, helpers } from '@vuelidate/validators';
+import { required, email, minLength, maxLength, sameAs, helpers } from '@vuelidate/validators';
 
 const kRequired = helpers.withMessage(
   '빈칸을 채워주세요',
@@ -15,6 +15,11 @@ const kMinLength = helpers.withMessage(
   minLength(6)
 )
 
+const kMaxLength = helpers.withMessage(
+  '너무 긴 이름은 허용되지 않습니다',
+  maxLength(10)
+)
+
 const kSameAs = (val) => helpers.withMessage(
   '비밀번호가 일치하지 않습니다',
   sameAs(val)
@@ -29,6 +34,7 @@ export {
   kRequired,
   kEmail,
   kMinLength,
+  kMaxLength,
   kSameAs,
   kAgree
 }
