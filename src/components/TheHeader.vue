@@ -17,7 +17,7 @@
           d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
         />
       </svg>
-      <router-link to="/">가상코인거래소</router-link>
+      <router-link to="/">비트주세요</router-link>
     </div>
     <div v-show="!mobileNavOpen" class="sm:hidden" @click="mobileNavOpen = true">
       <svg
@@ -36,8 +36,12 @@
       </svg>
     </div>
     <nav class="hidden sm:block space-x-4 mr-3 font-bold text-slate-100">
-      <span>로그인</span>
-      <span>회원가입</span>
+      <span>
+        <router-link to="/login">로그인</router-link>
+      </span>
+      <span>
+        <router-link to="/signup">회원가입</router-link>
+      </span>
     </nav>
   </header>
   <transition enter-active-class="animate__animated animate__slideInRight animate__faster">
@@ -61,7 +65,9 @@
         />
       </svg>
       <ul @click="mobileNavOpen = false" class="flex flex-col items-end space-y-2">
-        <li>로그인</li>
+        <li>
+          <router-link to="/login">로그인</router-link>
+        </li>
         <li>
           <router-link to="/signup">회원가입</router-link>
         </li>
