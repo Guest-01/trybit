@@ -6,12 +6,12 @@ import { getAuth } from "firebase/auth"
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
-  apiKey: "AIzaSyBnlCgnIsi5sIx1p3oDU7Z0BouCqiEMzCM",
-  authDomain: "coin-trading-simulator.firebaseapp.com",
-  projectId: "coin-trading-simulator",
-  storageBucket: "coin-trading-simulator.appspot.com",
-  messagingSenderId: "252218998314",
-  appId: "1:252218998314:web:34c0e785f9ee0a757a0d53"
+  apiKey: "AIzaSyArYv8-PASHapm5m7Mmdvfx1XrO9BzNvwA",
+  authDomain: "trybit-73d01.firebaseapp.com",
+  projectId: "trybit-73d01",
+  storageBucket: "trybit-73d01.appspot.com",
+  messagingSenderId: "444430224237",
+  appId: "1:444430224237:web:59b1a291d2b393351da864"
 };
 
 // Initialize Firebase
