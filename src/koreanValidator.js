@@ -17,7 +17,7 @@ const kMinLength = helpers.withMessage(
 
 const kMaxLength = helpers.withMessage(
   '너무 긴 이름은 허용되지 않습니다',
-  maxLength(10)
+  maxLength(12)
 )
 
 const kSameAs = (val) => helpers.withMessage(

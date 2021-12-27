@@ -1,5 +1,5 @@
 <template>
-  <ProfileCard :currentUser="currentUser" />
+  <ProfileCard :coins="coins" />
   <section class="space-y-1 my-2">
     <CoinCard
       @buy="$emit('buy', coin, 'buy')"

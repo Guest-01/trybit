@@ -84,7 +84,7 @@
 </template>
 
 <script>
-import { signOut } from "@firebase/auth";
+import { signOut, onAuthStateChanged } from "@firebase/auth";
 import { auth } from "../my.firebase";
 
 export default {
@@ -93,11 +93,7 @@ export default {
   data() {
     return {
       mobileNavOpen: false,
-    }
-  },
-  computed: {
-    user() {
-      return this.currentUser;
+      user: null,
     }
   },
   methods: {
@@ -106,6 +102,14 @@ export default {
       this.$router.push('/')
     }
   },
-  props: ['currentUser']
+  created() {
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        this.user = true
+      } else {
+        this.user = false
+      }
+    })
+  }
 }
 </script>

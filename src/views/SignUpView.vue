@@ -49,7 +49,7 @@
         id="passwordConfirm"
       />
       <div class="p-2 m-2">
-        <p class="text-xs">해당 사이트는 모의 투자 사이트이며, 실제 투자 행위와는 일절 관련이 없음에 동의합니다.</p>
+        <p class="text-xs">해당 사이트는 모의 투자 사이트이며, 이뤄지는 모든 투자 행위와 표기된 재화는 실제 효력이 없습니다.</p>
         <div class="space-x-1 text-right text-sm">
           <span
             class="ml-2 text-xs text-red-500"
@@ -70,7 +70,8 @@
 import useVuelidate from '@vuelidate/core'
 import { kRequired, kEmail, kMinLength, kMaxLength, kSameAs, kAgree } from '../koreanValidator';
 import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth"
-import { auth } from '../my.firebase';
+import { collection, addDoc, serverTimestamp } from "firebase/firestore"
+import { auth, db } from '../my.firebase';
 import ErrorModal from '../components/ErrorModal.vue';
 
 export default {
@@ -107,8 +108,16 @@ export default {
       this.v$.$validate()
       if (!this.v$.$error) {
         try {
-          await createUserWithEmailAndPassword(auth, this.email, this.password.password)
+          const userCredential = await createUserWithEmailAndPassword(auth, this.email, this.password.password)
           await updateProfile(auth.currentUser, { displayName: this.username })
+          await addDoc(collection(db, 'users'), {
+            uid: userCredential.user.uid,
+            username: userCredential.user.displayName,
+            cash: 500000,
+            coins: {},
+            createdAt: serverTimestamp(),
+            lastLoginAt: serverTimestamp()
+          })
           this.$router.push('/')
         } catch (error) {
           this.modalActive = true;

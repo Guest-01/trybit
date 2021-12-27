@@ -31,9 +31,9 @@
 </template>
 
 <script>
-import { signInWithEmailAndPassword } from '@firebase/auth';
+import { signInWithEmailAndPassword } from 'firebase/auth';
 import useVuelidate from '@vuelidate/core'
-import { kRequired, kEmail, kMinLength, kSameAs, kAgree } from '../koreanValidator';
+import { kRequired, kEmail, kMinLength } from '../koreanValidator';
 import { auth } from '../my.firebase';
 import ErrorModal from '../components/ErrorModal.vue';
 

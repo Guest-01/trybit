@@ -1,6 +1,6 @@
 <template>
   <div class="flex flex-col h-screen bg-gray-600">
-    <TheHeader :currentUser="currentUser" />
+    <TheHeader />
     <TradeModal
       :coin="selectedCoin"
       :price="selectedCoinPrice"
@@ -9,12 +9,7 @@
       :modalActive="modalActive"
     />
     <main class="mt-16 pb-2 px-2">
-      <router-view
-        @buy="openTradeModal"
-        @sell="openTradeModal"
-        :currentUser="currentUser"
-        :coins="coins"
-      />
+      <router-view @buy="openTradeModal" @sell="openTradeModal" :coins="coins" />
     </main>
   </div>
 </template>
@@ -25,8 +20,6 @@ import { onMounted, onBeforeUnmount, ref, computed } from 'vue'
 import { v4 as uuidv4 } from 'uuid'
 import axios from 'axios'
 import TradeModal from './components/TradeModal.vue';
-import { onAuthStateChanged, signOut } from '@firebase/auth';
-import { auth } from './my.firebase';
 
 const coins = ref({})
 const modalActive = ref(false)
@@ -37,16 +30,6 @@ const selectedCoinPrice = computed(() => {
     return coins.value["KRW-" + selectedCoin.value.code].trade_price
   } else {
     return 0
-  }
-})
-
-const currentUser = ref(false)
-
-onAuthStateChanged(auth, (user) => {
-  if (user) {
-    currentUser.value = user
-  } else {
-    currentUser.value = null;
   }
 })
 
@@ -122,7 +105,7 @@ onBeforeUnmount(() => {
   socket.close()
 })
 
-</script>
+                                                                                                                                                                                                                                                                                                </script>
 
 <style>
 @import "@/assets/base.css";
