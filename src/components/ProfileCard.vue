@@ -2,14 +2,14 @@
   <article class="bg-gradient-to-tl from-blue-200 to-blue-100 rounded-lg p-2">
     <!-- 로그인 했을 때 -->
     <div v-if="user" class="flex flex-col space-y-1">
-      <div class="text-sm text-indigo-600">{{ user?.username }} 님</div>
+      <div class="text-sm text-indigo-600">{{ user?.displayName }} 님</div>
       <div class="flex justify-between text-xl">
         <h2>총 자산</h2>
         <h2>{{ Number(totalBalance).toLocaleString() }}원</h2>
       </div>
       <div class="flex justify-between">
         <span>현금</span>
-        <span>{{ Number(user?.cash).toLocaleString() }}원</span>
+        <span>{{ Number(userDB?.cash).toLocaleString() }}원</span>
       </div>
       <hr />
       <table class="text-sm">
@@ -23,18 +23,28 @@
           </tr>
         </thead>
         <tbody class="text-right">
-          <!-- 내 지갑 반복 -->
-          <tr v-for="(coin, key) in user.coins" :key="key">
-            <td class="text-left">{{ coin.name }}</td>
-            <td>{{ Number(coin.buyAt).toLocaleString() }}</td>
-            <td
-              :class="{ 'text-red-600': isProfit, 'text-blue-600': isLoss }"
-            >{{ profitNow(coin.buyAt, key) }}%</td>
-            <td>{{ coin.count }}</td>
-            <td
-              :class="{ 'text-red-600': isProfit, 'text-blue-600': isLoss }"
-            >{{ Number(priceNow(coin.count, key)).toLocaleString() }}</td>
+          <tr v-if="hasNoCoins">
+            <td class="text-center text-gray-500" colspan="5">( 보유한 코인이 없습니다 )</td>
           </tr>
+          <!-- 내 지갑 반복 -->
+          <template v-for="(coin, key) in userDB?.coins" :key="key">
+            <!-- 카운트가 0 인 경우는 샀다가 전부 팔아서 없는거니까 안보여줌 -->
+            <tr v-if="coin.count != 0">
+              <td class="text-left">{{ coin.name }}</td>
+              <!-- 평단가 -->
+              <td>{{ Number(coin.buyAt).toLocaleString() }}</td>
+              <!-- 손익 -->
+              <td
+                :class="{ 'text-red-600': isProfit, 'text-blue-600': isLoss }"
+              >{{ profitNow(coin.buyAt, key) }}%</td>
+              <!-- 수량 -->
+              <td>{{ coin.count }}</td>
+              <!-- 평가 -->
+              <td
+                :class="{ 'text-red-600': isProfit, 'text-blue-600': isLoss }"
+              >{{ Number(priceNow(coin.count, key)).toLocaleString() }}</td>
+            </tr>
+          </template>
         </tbody>
       </table>
     </div>
@@ -49,18 +59,17 @@
 </template>
 
 <script>
-import { collection, query, where, getDocs } from "@firebase/firestore";
-import { onAuthStateChanged } from "firebase/auth"
-import { auth, db } from "../my.firebase"
+import { doc, onSnapshot } from "@firebase/firestore";
+import { db } from "../firebase/config"
 
 export default {
   name: "ProfileCard",
-  props: ['coins'],
   data() {
     return {
-      user: null,
       isProfit: false,
       isLoss: false,
+      userDB: null,
+      unsub: null
     }
   },
   methods: {
@@ -74,33 +83,59 @@ export default {
       this.isLoss = percentage < 0 ? true : false;
       return Number(percentage).toFixed(2);
     },
+    checkEmpty(obj) {
+      if (!obj) {
+        return true;
+      }
+      if (Object.keys(obj).length === 0) {
+        return true
+      }
+    },
   },
   computed: {
+    hasNoCoins() {
+      // 한번도 산적이 없어서 완전 비어있는 경우
+      if (this.checkEmpty(this.userDB?.coins)) {
+        return true
+      } else {
+        // count가 전부 0인 경우
+        const counts = Object.values(this.userDB?.coins).map(coin => coin.count);
+        return counts.every((val) => val === 0)
+      }
+    },
+    coins() {
+      return this.$store.state.coins
+    },
+    user() {
+      return this.$store.state.user
+    },
     totalBalance() {
-      if (this.user) {
+      if (this.userDB) {
         let coinValues = 0;
-        for (const [code, coin] of Object.entries(this.user.coins)) {
+        for (const [code, coin] of Object.entries(this.userDB.coins)) {
           coinValues += this.priceNow(coin.count, code)
         }
-        return coinValues + this.user.cash;
+        return coinValues + this.userDB.cash;
       } else {
         return null;
       }
     }
   },
-  created() {
-    onAuthStateChanged(auth, async (user) => {
-      if (user) {
-        const usersRef = collection(db, 'users');
-        const q = query(usersRef, where("uid", "==", user.uid));
-        const qSnapShot = await getDocs(q);
-        qSnapShot.forEach((doc) => {
-          this.user = doc.data();
-        })
-      } else {
-        this.user = null;
-      }
-    })
+  async created() {
+    if (this.user) {
+      const userDocRef = doc(db, "users", this.user.uid)
+      this.unsub = onSnapshot(userDocRef, (doc) => {
+        console.log('change in DB detected')
+        this.userDB = doc.data();
+      })
+    }
+    console.log('Profile Created!')
+  },
+  unmounted() {
+    if (this.unsub) {
+      this.unsub()
+      console.log('unsubscribed!')
+    }
   }
 }
 </script>

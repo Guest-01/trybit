@@ -1,5 +1,7 @@
 <template>
-  <ErrorModal @closeModal="modalActive = false" :modalActive="modalActive" :msg="error" />
+  <teleport to="body">
+    <ErrorModal @close="modalActive = false" :show="modalActive" :msg="error" />
+  </teleport>
   <div
     class="bg-gradient-to-tl from-slate-300 to-slate-200 rounded-lg p-2 flex flex-col items-center"
   >
@@ -31,10 +33,8 @@
 </template>
 
 <script>
-import { signInWithEmailAndPassword } from 'firebase/auth';
 import useVuelidate from '@vuelidate/core'
-import { kRequired, kEmail, kMinLength } from '../koreanValidator';
-import { auth } from '../my.firebase';
+import { kRequired, kEmail, kMinLength } from '../utils/koreanValidator';
 import ErrorModal from '../components/ErrorModal.vue';
 
 export default {
@@ -61,7 +61,7 @@ export default {
       this.v$.$validate();
       if (!this.v$.$error) {
         try {
-          await signInWithEmailAndPassword(auth, this.email, this.password);
+          await this.$store.dispatch('login', { email: this.email, password: this.password })
           this.$router.push("/");
         }
         catch (error) {

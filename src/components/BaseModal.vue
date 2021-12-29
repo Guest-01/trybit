@@ -1,13 +1,13 @@
 <template>
-  <transition name="modal-anim">
+  <transition name="modal-anim" appear>
     <div
-      v-show="modalActive"
-      class="flex justify-center items-center fixed h-full w-full bg-black/40"
+      v-if="show"
+      class="absolute inset-0 flex justify-center items-center h-full w-full bg-black/40 z-10"
     >
-      <transition name="modal-anim-inner">
+      <transition name="modal-anim-inner" appear>
         <div
-          v-show="modalActive"
-          class="relative -top-1/4 bg-white rounded-lg flex flex-col w-3/4 items-center p-2"
+          v-if="show"
+          class="relative -top-1/4 bg-white rounded-lg flex flex-col w-3/4 items-center p-2 z-20"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -15,7 +15,7 @@
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
-            @click="$emit('closeModal')"
+            @click="$emit('close')"
           >
             <path
               stroke-linecap="round"
@@ -36,11 +36,12 @@
 <script>
 export default {
   name: "BaseModal",
-  props: ["modalActive"],
+  props: ['show'],
+  emits: ['close']
 }
 </script>
 
-<style scoped>
+<style>
 .modal-anim-enter-active,
 .modal-anim-leave-active {
   transition: opacity 0.2s cubic-bezier(0.52, 0.02, 0.19, 1.02);

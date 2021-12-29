@@ -84,32 +84,27 @@
 </template>
 
 <script>
-import { signOut, onAuthStateChanged } from "@firebase/auth";
-import { auth } from "../my.firebase";
-
 export default {
   name: "TheHeader",
   components: {},
   data() {
     return {
       mobileNavOpen: false,
-      user: null,
+    }
+  },
+  computed: {
+    user() {
+      return this.$store.state.user;
+    },
+    authIsReady() {
+      return this.$store.state.authIsReady;
     }
   },
   methods: {
     async logout() {
-      await signOut(auth);
+      await this.$store.dispatch('logout');
       this.$router.push('/')
     }
   },
-  created() {
-    onAuthStateChanged(auth, (user) => {
-      if (user) {
-        this.user = true
-      } else {
-        this.user = false
-      }
-    })
-  }
 }
 </script>

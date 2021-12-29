@@ -1,10 +1,10 @@
 <template>
-  <BaseModal @closeModal="$emit('closeModal')">
-    <h3 class="text-2xl mb-2">{{ coin.korean_name }} {{ coin.code }}</h3>
+  <BaseModal @close="closeModal" :show="show">
+    <h3 class="text-2xl mb-2">{{ coin?.korean_name }} {{ coin.code }}</h3>
     <div class="flex justify-between w-full">
       <div class="flex flex-col">
         <span>현재가</span>
-        <span>{{ Number(price).toLocaleString() }}</span>
+        <span>{{ Number(coin.trade_price).toLocaleString() }}</span>
       </div>
       <div class="flex flex-col items-center border-2 rounded-lg">
         <div class="flex">
@@ -38,13 +38,13 @@
       <div class="space-x-2">
         <span>{{ Number(totalPrice).toLocaleString() }}</span>
         <button
-          v-if="buy"
-          @click="makeTransaction(buy)"
+          v-if="isBuy"
+          @click="makeTransaction(isBuy)"
           class="px-3 py-1 bg-gradient-to-r from-red-600 to-red-500 text-white rounded"
         >매수</button>
         <button
           v-else
-          @click="makeTransaction(buy)"
+          @click="makeTransaction(isBuy)"
           class="px-3 py-1 bg-gradient-to-r from-blue-600 to-blue-500 text-white rounded"
         >매도</button>
       </div>
@@ -54,24 +54,15 @@
 </template>
 
 <script>
-import { collection, addDoc, serverTimestamp } from "firebase/firestore"
-import { auth, db } from "../my.firebase"
+import { collection, addDoc, serverTimestamp, doc, updateDoc, increment, getDoc } from "firebase/firestore"
+import { auth, db } from "../firebase/config"
 import BaseModal from "./BaseModal.vue";
+
 export default {
   name: "TradeModal",
   components: { BaseModal },
-  props: {
-    buy: {
-      type: Boolean,
-      default: true
-    },
-    coin: {
-      type: Object,
-    },
-    price: {
-      type: Number
-    }
-  },
+  props: ['isBuy', 'code', 'show'],
+  emits: ['close'],
   data() {
     return {
       quantity: 0,
@@ -85,38 +76,68 @@ export default {
     }
   },
   computed: {
+    coin() {
+      return this.$store.state.coins["KRW-" + this.code]
+    },
     totalPrice() {
       if (Number.isNaN(parseFloat(this.quantity))) {
         return 0;
       }
-      return parseInt(this.price) * parseFloat(this.quantity)
+      return parseInt(this.coin.trade_price) * parseFloat(this.quantity)
     },
   },
   methods: {
+    closeModal() {
+      this.errorMsg = null;
+      this.$emit('close')
+    },
     async makeTransaction(buy) {
       if (!auth.currentUser) {
         this.errorMsg = "로그인이 필요합니다"
-        setTimeout(() => this.errorMsg = null, 3000)
         return
       }
       if (this.quantity <= 0) {
         this.errorMsg = "올바른 수량을 입력해주세요"
-        setTimeout(() => this.errorMsg = null, 3000)
         return
       }
       // add more validation (돈이 없는데 산다던지, 없는걸 판다던지)
+      const userDocRef = doc(db, 'users', auth.currentUser.uid);
+      const docSnap = await getDoc(userDocRef);
+      const userDB = docSnap.data();
+
       try {
+        // add transaction
         await addDoc(collection(db, "transactions"), {
           userId: auth.currentUser.uid,
           coinCode: this.coin.code,
-          price: this.price,
+          price: this.coin.trade_price,
           count: buy ? this.quantity : -this.quantity,
           timestamp: serverTimestamp(),
         })
+        // update userDB, 평단가 계산.
+        const oBuyAt = userDB.coins[this.coin.code]?.buyAt;
+        const oCount = userDB.coins[this.coin.code]?.count;
+        let newBuyAt;
+        if (oBuyAt && oCount) {
+          const totalPrice = (oBuyAt * oCount) + (this.coin.trade_price * this.quantity);
+          const totalQuantity = oCount + this.quantity;
+          newBuyAt = totalPrice / totalQuantity;
+        } else {
+          newBuyAt = this.coin.trade_price;
+        }
+        await updateDoc(userDocRef, {
+          [`coins.${this.coin.code}.name`]: this.coin.korean_name,
+          [`coins.${this.coin.code}.count`]: buy ? increment(this.quantity) : increment(-this.quantity),
+          [`coins.${this.coin.code}.buyAt`]: newBuyAt,
+        })
+
         this.errorMsg = null;
-        this.$emit('closeModal');
+        this.closeModal();
+        return
       } catch (err) {
+        this.errorMsg = "네트워크 오류"
         console.error(err)
+        return
       }
     }
   }

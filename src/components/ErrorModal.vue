@@ -1,5 +1,5 @@
 <template>
-  <BaseModal @closeModal="$emit('closeModal')">
+  <BaseModal @close="$emit('close')" :show="show">
     <p class="text-center">{{ msg }}</p>
   </BaseModal>
 </template>
@@ -10,8 +10,6 @@ import BaseModal from "./BaseModal.vue";
 export default {
   name: "ErrorModal",
   components: { BaseModal },
-  props: {
-    msg: String,
-  }
+  props: ['show', 'msg']
 }
 </script>

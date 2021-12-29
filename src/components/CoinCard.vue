@@ -48,8 +48,6 @@ import { numToKorean } from "num-to-korean"
 
 export default {
   name: "CoinCard",
-  components: {},
-  emits: ['buy', 'sell'],
   props: {
     coin: {
       type: Object,
@@ -63,6 +61,7 @@ export default {
       }
     },
   },
+  emits: ['buy', 'sell'],
   methods: {
     convertTp24h(volume) {
       return numToKorean(Math.floor(volume / 100000000) * 100000000, 'mixed')

@@ -1,5 +1,7 @@
 <template>
-  <ErrorModal @closeModal="modalActive = false" :modalActive="modalActive" :msg="error" />
+  <teleport to="body">
+    <ErrorModal @close="modalActive = false" :show="modalActive" :msg="error" />
+  </teleport>
   <div
     class="bg-gradient-to-tl from-slate-300 to-slate-200 rounded-lg p-2 flex flex-col items-center"
   >
@@ -68,10 +70,7 @@
 
 <script>
 import useVuelidate from '@vuelidate/core'
-import { kRequired, kEmail, kMinLength, kMaxLength, kSameAs, kAgree } from '../koreanValidator';
-import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth"
-import { collection, addDoc, serverTimestamp } from "firebase/firestore"
-import { auth, db } from '../my.firebase';
+import { kRequired, kEmail, kMinLength, kMaxLength, kSameAs, kAgree } from '../utils/koreanValidator';
 import ErrorModal from '../components/ErrorModal.vue';
 
 export default {
@@ -108,16 +107,7 @@ export default {
       this.v$.$validate()
       if (!this.v$.$error) {
         try {
-          const userCredential = await createUserWithEmailAndPassword(auth, this.email, this.password.password)
-          await updateProfile(auth.currentUser, { displayName: this.username })
-          await addDoc(collection(db, 'users'), {
-            uid: userCredential.user.uid,
-            username: userCredential.user.displayName,
-            cash: 500000,
-            coins: {},
-            createdAt: serverTimestamp(),
-            lastLoginAt: serverTimestamp()
-          })
+          await this.$store.dispatch('signup', { username: this.username, email: this.email, password: this.password.password });
           this.$router.push('/')
         } catch (error) {
           this.modalActive = true;
