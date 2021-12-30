@@ -36,7 +36,7 @@
     <div class="flex justify-between mt-4 font-bold items-center text-lg">
       <div>총 금액</div>
       <div class="space-x-2">
-        <span>{{ Number(totalPrice).toLocaleString() }}</span>
+        <span>{{ Number(Number(totalPrice).toFixed()).toLocaleString() }}</span>
         <button
           v-if="isBuy"
           @click="makeTransaction(isBuy)"
@@ -54,7 +54,7 @@
 </template>
 
 <script>
-import { collection, addDoc, serverTimestamp, doc, updateDoc, increment, getDoc } from "firebase/firestore"
+import { collection, addDoc, serverTimestamp, doc, updateDoc, increment, onSnapshot } from "firebase/firestore"
 import { auth, db } from "../firebase/config"
 import BaseModal from "./BaseModal.vue";
 
@@ -67,15 +67,72 @@ export default {
     return {
       quantity: 0,
       errorMsg: null,
-      selectVal: null,
+      selectVal: "선택",
+      userDocRef: null,
+      userDB: null,
+      unsub: null,
     }
   },
   watch: {
-    selectVal: function (val) {
-      // db에서 현금 가져온 뒤 quantity 계산해서 입력
+    selectVal(val) {
+      if (val === "선택") {
+        this.quantity = 0
+        return
+      }
+      if (this.isBuy) {
+        const num = this.userDB.cash / this.coin.trade_price
+        const bool = this.userDB.cash > this.coin.trade_price
+
+        switch (val) {
+          case "100":
+            this.quantity = bool ? Math.trunc(num) : Math.floor(num * 1000) / 1000
+            break;
+          case "50":
+            this.quantity = bool ? Math.trunc(num / 2) : Math.floor(num / 2 * 1000) / 1000
+            break;
+          case "20":
+            this.quantity = bool ? Math.trunc(num / 5) : Math.floor(num / 5 * 1000) / 1000
+            break;
+          case "10":
+            this.quantity = bool ? Math.trunc(num / 10) : Math.floor(num / 10 * 1000) / 1000
+            break;
+          default:
+            this.quantity = 0;
+            console.error('unexpected select value:', val)
+            break;
+        }
+      } else {
+        const num = this.userDB.coins[this.coin.code]?.count;
+        if (!num || num === 0) {
+          this.errorMsg = "보유중이지 않습니다"
+          return
+        }
+        switch (val) {
+          case "100":
+            this.quantity = num
+            break;
+          case "50":
+            this.quantity = Math.floor(num / 2 * 1000) / 1000
+            break;
+          case "20":
+            this.quantity = Math.floor(num / 5 * 1000) / 1000
+            break;
+          case "10":
+            this.quantity = Math.floor(num / 10 * 1000) / 1000
+            break;
+
+          default:
+            this.quantity = 0;
+            console.error('unexpected select value:', val)
+            break;
+        }
+      }
     }
   },
   computed: {
+    user() {
+      return this.$store.state.user
+    },
     coin() {
       return this.$store.state.coins["KRW-" + this.code]
     },
@@ -89,9 +146,12 @@ export default {
   methods: {
     closeModal() {
       this.errorMsg = null;
+      this.quantity = 0;
+      this.selectVal = "선택";
       this.$emit('close')
     },
     async makeTransaction(buy) {
+      // Validations start
       if (!auth.currentUser) {
         this.errorMsg = "로그인이 필요합니다"
         return
@@ -100,10 +160,24 @@ export default {
         this.errorMsg = "올바른 수량을 입력해주세요"
         return
       }
-      // add more validation (돈이 없는데 산다던지, 없는걸 판다던지)
-      const userDocRef = doc(db, 'users', auth.currentUser.uid);
-      const docSnap = await getDoc(userDocRef);
-      const userDB = docSnap.data();
+
+      // 고객 지갑 확인
+
+      // 돈이 모자라는데 사려는 경우
+      if (buy && this.userDB.cash < this.totalPrice) {
+        this.errorMsg = "잔고가 부족합니다"
+        return
+      }
+
+      // 없는걸 팔려고 하는 경우
+      if (!buy && this.userDB.coins[this.coin.code] === undefined) {
+        this.errorMsg = "보유중인 수량이 부족합니다"
+        return
+      }
+      if (!buy && this.userDB.coins[this.coin.code]?.count < this.quantity) {
+        this.errorMsg = "보유중인 수량이 부족합니다"
+        return
+      }
 
       try {
         // add transaction
@@ -114,9 +188,9 @@ export default {
           count: buy ? this.quantity : -this.quantity,
           timestamp: serverTimestamp(),
         })
-        // update userDB, 평단가 계산.
-        const oBuyAt = userDB.coins[this.coin.code]?.buyAt;
-        const oCount = userDB.coins[this.coin.code]?.count;
+        // update this.userDB, 평단가 계산.
+        const oBuyAt = this.userDB.coins[this.coin.code]?.buyAt;
+        const oCount = this.userDB.coins[this.coin.code]?.count;
         let newBuyAt;
         if (oBuyAt && oCount) {
           const totalPrice = (oBuyAt * oCount) + (this.coin.trade_price * this.quantity);
@@ -125,7 +199,8 @@ export default {
         } else {
           newBuyAt = this.coin.trade_price;
         }
-        await updateDoc(userDocRef, {
+        await updateDoc(this.userDocRef, {
+          cash: buy ? increment(-this.totalPrice) : increment(this.totalPrice),
           [`coins.${this.coin.code}.name`]: this.coin.korean_name,
           [`coins.${this.coin.code}.count`]: buy ? increment(this.quantity) : increment(-this.quantity),
           [`coins.${this.coin.code}.buyAt`]: newBuyAt,
@@ -139,6 +214,22 @@ export default {
         console.error(err)
         return
       }
+    }
+  },
+  async created() {
+    if (this.user) {
+      this.userDocRef = doc(db, "users", this.user.uid)
+      this.unsub = onSnapshot(this.userDocRef, (doc) => {
+        console.log('change in DB detected')
+        this.userDB = doc.data();
+      })
+    }
+    console.log('TradeModal Created!')
+  },
+  unmounted() {
+    if (this.unsub) {
+      this.unsub()
+      console.log('unsubscribed!')
     }
   }
 }

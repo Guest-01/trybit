@@ -9,7 +9,13 @@
       :coin="coin"
     />
     <teleport to="body">
-      <TradeModal @close="showModal = false" :show="showModal" :isBuy="isBuy" :code="codeToModal" />
+      <TradeModal
+        v-if="authIsReady"
+        @close="showModal = false"
+        :show="showModal"
+        :isBuy="isBuy"
+        :code="codeToModal"
+      />
     </teleport>
   </section>
 </template>
