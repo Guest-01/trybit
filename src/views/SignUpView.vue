@@ -108,6 +108,7 @@ export default {
       if (!this.v$.$error) {
         try {
           await this.$store.dispatch('signup', { username: this.username, email: this.email, password: this.password.password });
+          // TODO: DB 생성하고 cash 지급
           this.$router.push('/')
         } catch (error) {
           this.modalActive = true;
