@@ -1,29 +1,17 @@
-# coin-trading-simulator
+# trybit
+가상화폐 모의투자 사이트
 
-This template should help get you started developing with Vue 3 in Vite.
+## 목표 :dart:
+- 누구나 입문할 수 있는 모의 투자 사이트:heavy_check_mark: (계좌:x:, 실명인증:x:)
+- 머리아픈 차트 및 데이터 :x:
+- 실제 시세 실시간 반영 :heavy_check_mark:
 
-## Recommended IDE Setup
+## 기획 :memo:
+- :iphone:`mobile-first` 웹 애플리케이션
+- Vue3 + Vite(`esbuild`&`rollup.js`) + Tailwind CSS
+- Google Firebase
 
-[VSCode](https://code.visualstudio.com/) + [Volar](https://marketplace.visualstudio.com/items?itemName=johnsoncodehk.volar) (and disable Vetur).
+## 스크린샷 :computer:
+![loginScreen](loginAnimation.gif)
 
-## Customize configuration
-
-See [Vite Configuration Reference](https://vitejs.dev/config/).
-
-## Project Setup
-
-```sh
-npm install
-```
-
-### Compile and Hot-Reload for Development
-
-```sh
-npm run dev
-```
-
-### Compile and Minify for Production
-
-```sh
-npm run build
-```
+:copyright: 2021. Guest01 all rights reserved.
