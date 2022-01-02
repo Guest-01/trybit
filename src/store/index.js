@@ -22,7 +22,7 @@ const store = createStore({
   mutations: {
     updateCoins(state, payload) {
       state.coins = { ...payload };
-      console.log('updating coins!')
+      // console.log('updating coins!')
     },
     setUser(state, payload) {
       state.user = payload;

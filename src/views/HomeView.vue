@@ -32,7 +32,6 @@ export default {
     ProfileCard,
     TradeModal
   },
-  props: ['currentUser'],
   data() {
     return {
       showModal: false,

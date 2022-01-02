@@ -79,6 +79,10 @@ export default {
         this.quantity = 0
         return
       }
+      if (!this.user) {
+        this.quantity = 0
+        return
+      }
       if (this.isBuy) {
         const num = this.userDB.cash / this.coin.trade_price
         const bool = this.userDB.cash > this.coin.trade_price
@@ -224,12 +228,12 @@ export default {
         this.userDB = doc.data();
       })
     }
-    console.log('TradeModal Created!')
+    // console.log('TradeModal Created!')
   },
   unmounted() {
     if (this.unsub) {
       this.unsub()
-      console.log('unsubscribed!')
+      // console.log('unsubscribed!')
     }
   }
 }

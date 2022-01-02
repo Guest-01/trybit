@@ -6,7 +6,11 @@
     class="bg-gradient-to-tl from-slate-300 to-slate-200 rounded-lg p-2 flex flex-col items-center"
   >
     <h2 class="text-xl font-bold">회원가입</h2>
-    <p class="text-sm">간단하게 가입 후 시작하세요</p>
+    <p class="text-sm">가입시 시드머니 500,000원이 주어집니다</p>
+    <p class="text-sm">
+      (파산 시
+      <span class="font-bold">내 정보</span>에서 복구하세요)
+    </p>
     <hr class="my-2 w-full" />
     <form @submit.prevent="signup" class="flex flex-col w-full text-sm space-y-1">
       <div>
@@ -62,9 +66,15 @@
           <label for="agree">동의함</label>
         </div>
       </div>
-      <button type="submit" class="bg-indigo-500 text-white rounded mt-4 text-base py-2">회원가입</button>
+      <button
+        v-if="loading"
+        type="submit"
+        class="bg-gray-500 text-white rounded mt-4 text-base py-2"
+        disabled
+      >가입진행중...</button>
+      <button v-else type="submit" class="bg-indigo-500 text-white rounded mt-4 text-base py-2">회원가입</button>
     </form>
-    <button class="bg-white p-2 rounded w-full my-4">또는 구글로 로그인</button>
+    <!-- <button class="bg-white p-2 rounded w-full my-4">또는 구글로 로그인</button> -->
   </div>
 </template>
 
@@ -72,6 +82,8 @@
 import useVuelidate from '@vuelidate/core'
 import { kRequired, kEmail, kMinLength, kMaxLength, kSameAs, kAgree } from '../utils/koreanValidator';
 import ErrorModal from '../components/ErrorModal.vue';
+import { db } from "../firebase/config"
+import { doc, setDoc } from "firebase/firestore"
 
 export default {
   inheritAttrs: false,
@@ -89,6 +101,7 @@ export default {
         pwconfirm: '',
       },
       agree: null,
+      loading: false,
     }
   },
   validations() {
@@ -106,9 +119,16 @@ export default {
     async signup() {
       this.v$.$validate()
       if (!this.v$.$error) {
+        // TODO: check username isUnique
         try {
+          this.loading = true;
           await this.$store.dispatch('signup', { username: this.username, email: this.email, password: this.password.password });
-          // TODO: DB 생성하고 cash 지급
+          // DB 생성하고 초기 cash 지급
+          await setDoc(doc(db, "users", this.$store.state.user.uid), {
+            uid: this.$store.state.user.uid,
+            cash: 500000,
+            coins: {},
+          })
           this.$router.push('/')
         } catch (error) {
           this.modalActive = true;
@@ -128,6 +148,8 @@ export default {
               this.error = error.code;
               break;
           }
+        } finally {
+          this.loading = false;
         }
       } else {
         console.error("form validation error")

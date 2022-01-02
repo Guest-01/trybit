@@ -21,6 +21,16 @@ const router = createRouter({
       path: '/login',
       name: 'login',
       component: () => import('../views/LoginView.vue')
+    },
+    {
+      path: '/mypage',
+      name: 'mypage',
+      component: () => import('../views/MyPageView.vue')
+    },
+    {
+      path: '/resetpw',
+      name: 'resetpw',
+      component: () => import('../views/ResetPwView.vue')
     }
   ]
 })

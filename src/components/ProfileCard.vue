@@ -131,12 +131,12 @@ export default {
         this.userDB = doc.data();
       })
     }
-    console.log('Profile Created!')
+    // console.log('Profile Created!')
   },
   unmounted() {
     if (this.unsub) {
       this.unsub()
-      console.log('unsubscribed!')
+      // console.log('unsubscribed!')
     }
   }
 }

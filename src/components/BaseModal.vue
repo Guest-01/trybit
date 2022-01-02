@@ -2,7 +2,7 @@
   <transition name="modal-anim" appear>
     <div
       v-if="show"
-      class="absolute inset-0 flex justify-center items-center h-full w-full bg-black/40 z-10"
+      class="absolute inset-0 flex justify-center items-center h-full mx-auto bg-black/40 z-10"
     >
       <transition name="modal-anim-inner" appear>
         <div

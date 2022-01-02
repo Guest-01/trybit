@@ -1,7 +1,8 @@
 <template>
-  <div class="flex flex-col h-screen bg-gray-600">
+  <div class="flex flex-col h-full min-h-screen bg-gray-600 mx-auto">
     <TheHeader />
-    <main class="mt-16 pb-2 px-2">
+    <div class="hidden lg:block text-white text-center mt-2">이 웹사이트는 모바일에 최적화되어있습니다</div>
+    <main class="p-2 max-w-screen-md mx-auto container">
       <router-view />
     </main>
   </div>
