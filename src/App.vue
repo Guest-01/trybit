@@ -5,6 +5,9 @@
     <main class="p-2 max-w-screen-md mx-auto container">
       <router-view />
     </main>
+    <footer class="text-white container mx-auto flex flex-col items-center py-2 mb-2">
+      <a href="https://github.com/Guest-01/trybit" class="text-sm underline">To GitHub</a>
+    </footer>
   </div>
 </template>
 
