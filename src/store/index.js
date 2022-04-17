@@ -39,7 +39,7 @@ const store = createStore({
     async openSocket(context) {
       const { data: allMarkets } = await axios.get('https://api.upbit.com/v1/market/all')
       const krw = allMarkets.filter(coin => coin.market.startsWith('KRW-'));
-      const wanted = ["KRW-BTC", "KRW-XRP", "KRW-DOGE", "KRW-ETH",]
+      const wanted = ["KRW-BTC", "KRW-XRP", "KRW-DOGE", "KRW-ETH", "KRW-SAND", "KRW-LINK", "KRW-ADA", "KRW-BORA"]
       // "KRW-ETC", "KRW-EOS", "KRW-MLK", "KRW-SAND"
       const filtered = krw.filter((coin) => wanted.includes(coin.market))
 

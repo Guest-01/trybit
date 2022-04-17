@@ -1,5 +1,5 @@
 <template>
-  <article class="bg-gradient-to-tl from-blue-200 to-blue-100 rounded-lg p-2">
+  <article class="bg-gradient-to-tl from-blue-200 to-blue-100 rounded-lg p-2 md:px-40">
     <!-- 로그인 했을 때 -->
     <div v-if="user" class="flex flex-col space-y-1">
       <div class="text-sm text-indigo-600">{{ user?.displayName }} 님</div>
@@ -24,7 +24,9 @@
         </thead>
         <tbody class="text-right">
           <tr v-if="hasNoCoins">
-            <td class="text-center text-gray-500" colspan="5">( 보유한 코인이 없습니다 )</td>
+            <td class="text-center text-gray-500" colspan="5">
+              ( 보유한 코인이 없습니다 )
+            </td>
           </tr>
           <!-- 내 지갑 반복 -->
           <template v-for="(coin, key) in userCoins" :key="key">
@@ -35,14 +37,24 @@
               <td>{{ formatNum(coin.buyAt) }}</td>
               <!-- 손익 -->
               <td
-                :class="{ 'text-red-600': profitNow(coin.buyAt, key) > 0, 'text-blue-600': profitNow(coin.buyAt, key) < 0 }"
-              >{{ profitNow(coin.buyAt, key) }}%</td>
+                :class="{
+                  'text-red-600': profitNow(coin.buyAt, key) > 0,
+                  'text-blue-600': profitNow(coin.buyAt, key) < 0,
+                }"
+              >
+                {{ profitNow(coin.buyAt, key) }}%
+              </td>
               <!-- 수량 -->
               <td>{{ Math.floor(coin.count * 1000) / 1000 }}</td>
               <!-- 평가 -->
               <td
-                :class="{ 'text-red-600': profitNow(coin.count, key) > 0, 'text-blue-600': profitNow(coin.count, key) < 0 }"
-              >{{ formatNum(priceNow(coin.count, key)) }}</td>
+                :class="{
+                  'text-red-600': profitNow(coin.count, key) > 0,
+                  'text-blue-600': profitNow(coin.count, key) < 0,
+                }"
+              >
+                {{ formatNum(priceNow(coin.count, key)) }}
+              </td>
             </tr>
           </template>
         </tbody>
@@ -53,29 +65,30 @@
       <router-link
         to="/login"
         class="cursor-pointer underline underline-offset-2"
-      >내 자산을 보시려면 로그인해주세요</router-link>
+        >내 자산을 보시려면 로그인해주세요</router-link
+      >
     </div>
   </article>
 </template>
 
 <script>
 import { doc, onSnapshot } from "@firebase/firestore";
-import { db } from "../firebase/config"
+import { db } from "../firebase/config";
 
 export default {
   name: "ProfileCard",
   data() {
     return {
       userDB: null,
-      unsub: null
-    }
+      unsub: null,
+    };
   },
   methods: {
     formatNum(num) {
       return Number(Number(num).toFixed()).toLocaleString();
     },
     priceNow(count, coinCode) {
-      return count * this.coins["KRW-" + coinCode].trade_price
+      return count * this.coins["KRW-" + coinCode].trade_price;
     },
     profitNow(buyAt, coinCode) {
       const price = this.coins["KRW-" + coinCode].trade_price;
@@ -87,7 +100,7 @@ export default {
         return true;
       }
       if (Object.keys(obj).length === 0) {
-        return true
+        return true;
       }
     },
   },
@@ -95,18 +108,20 @@ export default {
     hasNoCoins() {
       // 한번도 산적이 없어서 완전 비어있는 경우
       if (this.checkEmpty(this.userDB?.coins)) {
-        return true
+        return true;
       } else {
         // count가 전부 0인 경우
-        const counts = Object.values(this.userDB?.coins).map(coin => coin.count);
-        return counts.every((val) => val === 0)
+        const counts = Object.values(this.userDB?.coins).map(
+          (coin) => coin.count
+        );
+        return counts.every((val) => val === 0);
       }
     },
     coins() {
-      return this.$store.state.coins
+      return this.$store.state.coins;
     },
     user() {
-      return this.$store.state.user
+      return this.$store.state.user;
     },
     userCoins() {
       return this.userDB?.coins;
@@ -115,29 +130,29 @@ export default {
       if (this.userDB) {
         let coinValues = 0;
         for (const [code, coin] of Object.entries(this.userDB.coins)) {
-          coinValues += this.priceNow(coin.count, code)
+          coinValues += this.priceNow(coin.count, code);
         }
         return coinValues + this.userDB.cash;
       } else {
         return null;
       }
-    }
+    },
   },
   async created() {
     if (this.user) {
-      const userDocRef = doc(db, "users", this.user.uid)
+      const userDocRef = doc(db, "users", this.user.uid);
       this.unsub = onSnapshot(userDocRef, (doc) => {
-        console.log('change in DB detected')
+        console.log("change in DB detected");
         this.userDB = doc.data();
-      })
+      });
     }
     // console.log('Profile Created!')
   },
   unmounted() {
     if (this.unsub) {
-      this.unsub()
+      this.unsub();
       // console.log('unsubscribed!')
     }
-  }
-}
+  },
+};
 </script>

@@ -1,6 +1,6 @@
 <template>
   <ProfileCard v-if="authIsReady" />
-  <section class="space-y-1 my-2">
+  <section class="mt-2 space-y-1 md:grid md:grid-cols-2 md:gap-1.5 md:space-y-0">
     <CoinCard
       @buy="showBuyModal"
       @sell="showSellModal"
@@ -21,23 +21,23 @@
 </template>
 
 <script>
-import CoinCard from '../components/CoinCard.vue';
-import ProfileCard from '../components/ProfileCard.vue';
-import TradeModal from '../components/TradeModal.vue';
+import CoinCard from "../components/CoinCard.vue";
+import ProfileCard from "../components/ProfileCard.vue";
+import TradeModal from "../components/TradeModal.vue";
 
 export default {
   name: "HomeView",
   components: {
     CoinCard,
     ProfileCard,
-    TradeModal
+    TradeModal,
   },
   data() {
     return {
       showModal: false,
       isBuy: false,
       codeToModal: "",
-    }
+    };
   },
   computed: {
     coins() {
@@ -45,21 +45,21 @@ export default {
     },
     authIsReady() {
       return this.$store.state.authIsReady;
-    }
+    },
   },
   methods: {
     showBuyModal(code) {
-      this.showModal = true
-      this.isBuy = true
-      this.codeToModal = code
+      this.showModal = true;
+      this.isBuy = true;
+      this.codeToModal = code;
     },
     showSellModal(code) {
-      this.showModal = true
-      this.isBuy = false
-      this.codeToModal = code
+      this.showModal = true;
+      this.isBuy = false;
+      this.codeToModal = code;
     },
-  }
-}
+  },
+};
 </script>
 
 <style scoped>
