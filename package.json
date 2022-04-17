@@ -1,28 +1,17 @@
 {
-  "name": "vue-project",
+  "name": "trybit-v2",
+  "private": true,
   "version": "0.0.0",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview --port 5050"
+    "preview": "vite preview"
   },
   "dependencies": {
-    "@vuelidate/core": "^2.0.0-alpha.32",
-    "@vuelidate/validators": "^2.0.0-alpha.25",
-    "axios": "^0.24.0",
-    "firebase": "^9.6.1",
-    "moment": "^2.29.1",
-    "num-to-korean": "^0.4.3",
-    "uuid": "^8.3.2",
-    "vue": "^3.2.26",
-    "vue-router": "^4.0.12",
-    "vuex": "^4.0.2"
+    "vue": "^3.2.25"
   },
   "devDependencies": {
-    "@vitejs/plugin-vue": "^2.0.0",
-    "autoprefixer": "^10.4.0",
-    "postcss": "^8.4.5",
-    "tailwindcss": "^3.0.6",
-    "vite": "^2.7.1"
+    "@vitejs/plugin-vue": "^2.3.1",
+    "vite": "^2.9.2"
   }
 }
