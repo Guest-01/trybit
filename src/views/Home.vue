@@ -9,6 +9,15 @@
       <v-col cols="12">Counter: {{ counter }}</v-col>
       <v-col><v-btn @click="increment" color="success">up</v-btn></v-col>
     </v-row>
+    <v-row>
+      <v-col cols="auto">
+        <v-btn @click="open">open</v-btn>
+      </v-col>
+      <v-col cols="auto">
+        <v-btn @click="close">close</v-btn>
+      </v-col>
+      <v-col cols="auto"> Open Console to See. </v-col>
+    </v-row>
   </v-container>
 </template>
 
@@ -23,6 +32,12 @@ export default {
   methods: {
     increment() {
       this.$store.commit("SET_COUNTER", this.counter + 1);
+    },
+    open() {
+      this.$store.dispatch("openSocket");
+    },
+    close() {
+      this.$store.dispatch("closeSocket");
     },
   },
 };
