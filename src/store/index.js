@@ -5,21 +5,16 @@ import { v4 as uuidv4 } from 'uuid'
 const store = createStore({
   state() {
     return {
-      counter: 0,
       socket: null,
     }
   },
   mutations: {
-    SET_COUNTER(state, payload) {
-      state.counter = payload;
-    },
     SET_SOCKET(state, payload) {
       state.socket = payload;
     }
   },
   actions: {
     async getMarkets() {
-      console.log("get!")
       const res = (await axios.get("https://api.upbit.com/v1/market/all")).data;
       console.log(res);
     },
@@ -52,8 +47,8 @@ const store = createStore({
       commit("SET_SOCKET", socket)
     },
     async closeSocket({ state }) {
-      state.socket.close();
-    }
+      state.socket?.close();
+    },
   }
 })
 
