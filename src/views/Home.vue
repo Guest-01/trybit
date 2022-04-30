@@ -1,28 +1,21 @@
 <template>
-  <v-container>
-    <v-row>
-      <v-col cols="12">
-        <h1>Home Page</h1>
-      </v-col>
-    </v-row>
-    <v-row>
-      <v-col cols="auto">
-        <v-btn @click="open">open</v-btn>
-      </v-col>
-      <v-col cols="auto">
-        <v-btn @click="close">close</v-btn>
-      </v-col>
-      <v-col cols="auto"> Open Console to See. </v-col>
-    </v-row>
-    <v-row>
-      <v-col cols="auto">
-        <v-btn @click="getCandle">get candle</v-btn>
-      </v-col>
-      <v-col cols="auto">
-        <line-chart :chartData="chartData" />
-      </v-col>
-    </v-row>
-  </v-container>
+  <v-row>
+    <v-col cols="12">
+      <h1>비트코인 모의투자하기</h1>
+    </v-col>
+  </v-row>
+  <v-row max-height:>
+    <v-col>
+      <v-card>
+        <v-card-title>
+          <span>BTC/KRW</span>
+        </v-card-title>
+        <v-card-text>
+          <line-chart :chartData="chartData" :chartOptions="chartOptions" height="260" />
+        </v-card-text>
+      </v-card>
+    </v-col>
+  </v-row>
 </template>
 
 <script>
