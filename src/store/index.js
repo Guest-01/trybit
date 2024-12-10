@@ -74,12 +74,12 @@ const store = createStore({
         } else {
           // 예시: 프로세스가 죽거나 네트워크에 장애가 있는 경우
           // event.code가 1006이 됩니다.
-          console.log('[close] 커넥션이 죽었습니다.');
+          console.warn(`[close] 커넥션이 죽었습니다. ${JSON.stringify(event)}`);
         }
       }
 
       socket.onerror = function (error) {
-        console.log(`[error] ${error.message}`);
+        console.warn(`[error] ${JSON.stringify(error)}`);
       }
     },
 
