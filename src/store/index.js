@@ -37,6 +37,40 @@ const store = createStore({
 
     // Web Socket for Coins
     async openSocket(context) {
+      const connectWebSocket = () => {
+        let socket = new WebSocket('wss://api.upbit.com/websocket/v1');
+
+        socket.onopen = (e) => {
+          console.log('[open] 웹소켓이 열렸습니다');
+          socket.send(
+            `${JSON.stringify(
+              [{ ticket: uuidv4() }, { type: 'ticker', codes: krw.map(c => c.market) }]
+            )}`
+          );
+        }
+
+        socket.onmessage = async (event) => {
+          const ticker = await new Response(event.data).json()
+          if (ticker.code in tmp) {
+            tmp[ticker.code] = { ...tmp[ticker.code], ...ticker }
+            tmp[ticker.code].code = ticker.code.replace('KRW-', '');
+            context.commit('updateCoins', tmp)
+          }
+        }
+
+        socket.onclose = (event) => {
+          console.warn('[close] 커넥션이 종료되었습니다. 재연결 시도...');
+          setTimeout(connectWebSocket, 3000); // 3초 후 재연결 시도
+        }
+
+        socket.onerror = function (error) {
+          console.warn(`[error] ${JSON.stringify(error)}`);
+          socket.close(); // 에러 발생 시 연결을 종료하고 재연결 시도
+        }
+
+        return socket;
+      }
+
       const { data: allMarkets } = await axios.get('https://api.upbit.com/v1/market/all')
       const krw = allMarkets.filter(coin => coin.market.startsWith('KRW-'));
       const wanted = ["KRW-BTC", "KRW-XRP", "KRW-DOGE", "KRW-ETH", "KRW-SAND", "KRW-LINK", "KRW-ADA", "KRW-BORA"]
@@ -48,38 +82,10 @@ const store = createStore({
         tmp[coin.market] = { korean_name: coin.korean_name, enlgish_name: coin.english_name }
       });
 
-      let socket = new WebSocket('wss://api.upbit.com/websocket/v1')
-
-      socket.onopen = (e) => {
-        console.log('[open] 웹소켓이 열렸습니다');
-        socket.send(
-          `${JSON.stringify(
-            [{ ticket: uuidv4() }, { type: 'ticker', codes: krw.map(c => c.market) }]
-          )}`
-        )
-      }
-
-      socket.onmessage = async (event) => {
-        const ticker = await new Response(event.data).json()
-        if (ticker.code in tmp) {
-          tmp[ticker.code] = { ...tmp[ticker.code], ...ticker }
-          tmp[ticker.code].code = ticker.code.replace('KRW-', '');
-          context.commit('updateCoins', tmp)
-        }
-      }
-
-      socket.onclose = (event) => {
-        if (event.wasClean) {
-          console.log(`[close] 커넥션이 정상적으로 종료되었습니다(code=${event.code} reason=${event.reason})`);
-        } else {
-          // 예시: 프로세스가 죽거나 네트워크에 장애가 있는 경우
-          // event.code가 1006이 됩니다.
-          console.warn(`[close] 커넥션이 죽었습니다. ${JSON.stringify(event)}`);
-        }
-      }
-
-      socket.onerror = function (error) {
-        console.warn(`[error] ${JSON.stringify(error)}`);
+      try {
+        const socket = connectWebSocket();
+      } catch (error) {
+        console.error('WebSocket 연결 중 오류:', error);
       }
     },
 

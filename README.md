@@ -20,6 +20,7 @@
 - `2021-12-17` 개발 시작
 - `2022-01-03` 첫 배포 to Firebase Hosting
 - `2022-01-09` 방문카운터 추가, 코인 종류 추가, 태블릿 지원(반응형)
+- `2024-12-20` WebSocket API 재연결 시도 추가
 
 ## 데모 스크린샷 :computer:
 ![loginScreen](loginAnimation.gif)

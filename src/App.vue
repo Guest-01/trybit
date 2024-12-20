@@ -65,7 +65,7 @@ export default {
     },
   },
   async created() {
-    this.$store.dispatch("openSocket");
+    await this.$store.dispatch("openSocket");
     await this.addCounter();
     await this.loadCounter();
     console.log("counter done");
